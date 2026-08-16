@@ -6859,6 +6859,87 @@
         "documentation": {}
     },
     {
+        "label": "make_image",
+        "kind": 2,
+        "importPath": "training.make_synthetic_dataset",
+        "description": "training.make_synthetic_dataset",
+        "peekOfCode": "def make_image(rng, out_path, labels_out):\n    img = np.full((IMG_SIZE, IMG_SIZE, 3), (30, 30, 30), dtype=np.uint8)\n    boxes = []\n    n_boxes = rng.randint(3, 8)\n    attempts = 0\n    while len(boxes) < n_boxes and attempts < 200:\n        attempts += 1\n        w = rng.randint(24, 56)\n        h = rng.randint(24, 56)\n        x1 = rng.randint(8, IMG_SIZE - w - 8)",
+        "detail": "training.make_synthetic_dataset",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "training.make_synthetic_dataset",
+        "description": "training.make_synthetic_dataset",
+        "peekOfCode": "def main():\n    os.makedirs(os.path.join(DATA_DIR, \"train\"), exist_ok=True)\n    os.makedirs(os.path.join(DATA_DIR, \"val\"), exist_ok=True)\n    with open(os.path.join(DATA_DIR, \"classes.csv\"), \"w\") as f:\n        for i, cls in enumerate(CLASS_COLORS):\n            f.write(\"{},{}\\n\".format(cls, i))\n    rng = random.Random(SEED)\n    for split, count, labels_file in ((\"train\", N_TRAIN, \"train_labels.csv\"),\n                                      (\"val\", N_VAL, \"val_labels.csv\")):\n        labels_out = []",
+        "detail": "training.make_synthetic_dataset",
+        "documentation": {}
+    },
+    {
+        "label": "IMG_SIZE",
+        "kind": 5,
+        "importPath": "training.make_synthetic_dataset",
+        "description": "training.make_synthetic_dataset",
+        "peekOfCode": "IMG_SIZE = 320\nN_TRAIN = 40\nN_VAL = 12\nSEED = 42\n# class name -> BGR color used to draw the tile on the synthetic image\nCLASS_COLORS = {\n    \"pokecenter\": (255, 144, 30),\n    \"pokemart\": (0, 140, 255),\n    \"npc\": (50, 50, 220),\n    \"house\": (43, 90, 139),",
+        "detail": "training.make_synthetic_dataset",
+        "documentation": {}
+    },
+    {
+        "label": "N_TRAIN",
+        "kind": 5,
+        "importPath": "training.make_synthetic_dataset",
+        "description": "training.make_synthetic_dataset",
+        "peekOfCode": "N_TRAIN = 40\nN_VAL = 12\nSEED = 42\n# class name -> BGR color used to draw the tile on the synthetic image\nCLASS_COLORS = {\n    \"pokecenter\": (255, 144, 30),\n    \"pokemart\": (0, 140, 255),\n    \"npc\": (50, 50, 220),\n    \"house\": (43, 90, 139),\n    \"gym\": (240, 32, 160),",
+        "detail": "training.make_synthetic_dataset",
+        "documentation": {}
+    },
+    {
+        "label": "N_VAL",
+        "kind": 5,
+        "importPath": "training.make_synthetic_dataset",
+        "description": "training.make_synthetic_dataset",
+        "peekOfCode": "N_VAL = 12\nSEED = 42\n# class name -> BGR color used to draw the tile on the synthetic image\nCLASS_COLORS = {\n    \"pokecenter\": (255, 144, 30),\n    \"pokemart\": (0, 140, 255),\n    \"npc\": (50, 50, 220),\n    \"house\": (43, 90, 139),\n    \"gym\": (240, 32, 160),\n    \"exit\": (255, 255, 0),",
+        "detail": "training.make_synthetic_dataset",
+        "documentation": {}
+    },
+    {
+        "label": "SEED",
+        "kind": 5,
+        "importPath": "training.make_synthetic_dataset",
+        "description": "training.make_synthetic_dataset",
+        "peekOfCode": "SEED = 42\n# class name -> BGR color used to draw the tile on the synthetic image\nCLASS_COLORS = {\n    \"pokecenter\": (255, 144, 30),\n    \"pokemart\": (0, 140, 255),\n    \"npc\": (50, 50, 220),\n    \"house\": (43, 90, 139),\n    \"gym\": (240, 32, 160),\n    \"exit\": (255, 255, 0),\n    \"wall\": (128, 128, 128),",
+        "detail": "training.make_synthetic_dataset",
+        "documentation": {}
+    },
+    {
+        "label": "CLASS_COLORS",
+        "kind": 5,
+        "importPath": "training.make_synthetic_dataset",
+        "description": "training.make_synthetic_dataset",
+        "peekOfCode": "CLASS_COLORS = {\n    \"pokecenter\": (255, 144, 30),\n    \"pokemart\": (0, 140, 255),\n    \"npc\": (50, 50, 220),\n    \"house\": (43, 90, 139),\n    \"gym\": (240, 32, 160),\n    \"exit\": (255, 255, 0),\n    \"wall\": (128, 128, 128),\n    \"grass\": (0, 160, 0),\n}",
+        "detail": "training.make_synthetic_dataset",
+        "documentation": {}
+    },
+    {
+        "label": "HERE",
+        "kind": 5,
+        "importPath": "training.make_synthetic_dataset",
+        "description": "training.make_synthetic_dataset",
+        "peekOfCode": "HERE = os.path.dirname(os.path.abspath(__file__))\nDATA_DIR = os.path.join(HERE, \"data\")\ndef make_image(rng, out_path, labels_out):\n    img = np.full((IMG_SIZE, IMG_SIZE, 3), (30, 30, 30), dtype=np.uint8)\n    boxes = []\n    n_boxes = rng.randint(3, 8)\n    attempts = 0\n    while len(boxes) < n_boxes and attempts < 200:\n        attempts += 1\n        w = rng.randint(24, 56)",
+        "detail": "training.make_synthetic_dataset",
+        "documentation": {}
+    },
+    {
+        "label": "DATA_DIR",
+        "kind": 5,
+        "importPath": "training.make_synthetic_dataset",
+        "description": "training.make_synthetic_dataset",
+        "peekOfCode": "DATA_DIR = os.path.join(HERE, \"data\")\ndef make_image(rng, out_path, labels_out):\n    img = np.full((IMG_SIZE, IMG_SIZE, 3), (30, 30, 30), dtype=np.uint8)\n    boxes = []\n    n_boxes = rng.randint(3, 8)\n    attempts = 0\n    while len(boxes) < n_boxes and attempts < 200:\n        attempts += 1\n        w = rng.randint(24, 56)\n        h = rng.randint(24, 56)",
+        "detail": "training.make_synthetic_dataset",
+        "documentation": {}
+    },
+    {
         "label": "context",
         "kind": 5,
         "importPath": "zmqtest.client",

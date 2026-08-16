@@ -19,3 +19,5 @@ cuda_runtime/
 
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md
+
+training/data/

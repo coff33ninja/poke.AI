@@ -6,10 +6,15 @@
 .DESCRIPTION
     TensorFlow 2.10 (the last TF with native-Windows GPU support) requires the
     CUDA 11.2 and cuDNN 8.1 runtime DLLs. Instead of installing the CUDA
-    toolkit into the main system, this script pulls the conda-forge packages
-    (cudatoolkit 11.2.2, cudnn 8.1.0.77) and extracts just the DLLs into
-    cuda_runtime/bin. ai/sitecustomize.py prepends that folder to PATH at
-    interpreter startup, so TF finds the DLLs with zero system changes.
+    toolkit into the main system, this script pulls the cudatoolkit 11.2.2
+    package from conda-forge and the official NVIDIA cuDNN 8.1.0.77 for CUDA
+    11.2 redistributable, then extracts just the DLLs into cuda_runtime/bin.
+    sitecustomize.py prepends that folder to PATH at interpreter startup, so
+    TF finds the DLLs with zero system changes.
+
+    NOTE: cuDNN MUST be the official NVIDIA build. The conda-forge cudnn
+    binaries crash TensorFlow 2.10 with exit code 0xC0000409 on the first
+    GPU convolution, even though they report the correct version.
 
     Idempotent: skips the download if cuda_runtime/bin already has the DLLs.
 #>
@@ -21,10 +26,8 @@ $targetDir = Join-Path $root 'cuda_runtime'
 $binDir = Join-Path $targetDir 'bin'
 $workDir = Join-Path $env:TEMP 'poke_ai_cuda_runtime'
 
-$pkgs = @(
-    @{ Name = 'cudatoolkit'; File = 'win-64/cudatoolkit-11.2.2-h933977f_8.tar.bz2'; Url = 'https://conda.anaconda.org/conda-forge/win-64/cudatoolkit-11.2.2-h933977f_8.tar.bz2' },
-    @{ Name = 'cudnn';       File = 'win-64/cudnn-8.1.0.77-h37a4af2_0.tar.bz2';       Url = 'https://conda.anaconda.org/conda-forge/win-64/cudnn-8.1.0.77-h37a4af2_0.tar.bz2' }
-)
+$cudatoolkit = @{ Name = 'cudatoolkit'; File = 'win-64/cudatoolkit-11.2.2-h933977f_8.tar.bz2'; Url = 'https://conda.anaconda.org/conda-forge/win-64/cudatoolkit-11.2.2-h933977f_8.tar.bz2' }
+$cudnn = @{ Name = 'cudnn'; File = 'cudnn-11.2-windows-x64-v8.1.0.77.zip'; Url = 'https://developer.download.nvidia.com/compute/redist/cudnn/v8.1.0/cudnn-11.2-windows-x64-v8.1.0.77.zip' }
 
 function Get-Python {
     $venvPy = Join-Path $root '.venv\Scripts\python.exe'
@@ -36,31 +39,49 @@ $alreadyPopulated = (Test-Path $binDir) -and ((Get-ChildItem -LiteralPath $binDi
 if (-not $alreadyPopulated) {
     New-Item -ItemType Directory -Path $targetDir, $workDir -Force | Out-Null
 
-    foreach ($pkg in $pkgs) {
-        $archive = Join-Path $workDir $pkg.File
-        if (-not (Test-Path $archive)) {
-            Write-Host "Downloading $($pkg.Name) ..."
-            $archiveParent = Split-Path -Parent $archive
-            New-Item -ItemType Directory -Path $archiveParent -Force | Out-Null
-            Invoke-WebRequest -Uri $pkg.Url -OutFile $archive
-        }
-        $extractDir = Join-Path $workDir $pkg.Name
-        $dllDir = Join-Path $extractDir 'Library\bin'
-        $alreadyExtracted = (Test-Path $dllDir) -and ((Get-ChildItem -LiteralPath $dllDir -Filter '*.dll' -File | Measure-Object).Count -gt 0)
-        if (-not $alreadyExtracted) {
-            if (Test-Path $extractDir) { Remove-Item -LiteralPath $extractDir -Recurse -Force }
-            New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
-            Write-Host "Extracting $($pkg.Name) ..."
-            & (Get-Python) -c "import sys, tarfile; tarfile.open(sys.argv[1], 'r:bz2').extractall(sys.argv[2])" $archive $extractDir
-            if ($LASTEXITCODE -ne 0) { throw "Failed to extract $($pkg.Name)" }
-        } else {
-            Write-Host "$($pkg.Name) already extracted, skipping."
-        }
+    # --- cudatoolkit 11.2.2 (conda-forge tar.bz2) ---
+    $pkg = $cudatoolkit
+    $archive = Join-Path $workDir $pkg.File
+    if (-not (Test-Path $archive)) {
+        Write-Host "Downloading $($pkg.Name) ..."
+        $archiveParent = Split-Path -Parent $archive
+        New-Item -ItemType Directory -Path $archiveParent -Force | Out-Null
+        Invoke-WebRequest -Uri $pkg.Url -OutFile $archive
+    }
+    $extractDir = Join-Path $workDir $pkg.Name
+    $dllDir = Join-Path $extractDir 'Library\bin'
+    $alreadyExtracted = (Test-Path $dllDir) -and ((Get-ChildItem -LiteralPath $dllDir -Filter '*.dll' -File | Measure-Object).Count -gt 0)
+    if (-not $alreadyExtracted) {
+        if (Test-Path $extractDir) { Remove-Item -LiteralPath $extractDir -Recurse -Force }
+        New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
+        Write-Host "Extracting $($pkg.Name) ..."
+        & (Get-Python) -c "import sys, tarfile; tarfile.open(sys.argv[1], 'r:bz2').extractall(sys.argv[2])" $archive $extractDir
+        if ($LASTEXITCODE -ne 0) { throw "Failed to extract $($pkg.Name)" }
+    } else {
+        Write-Host "$($pkg.Name) already extracted, skipping."
+    }
+
+    # --- cuDNN 8.1.0.77 (official NVIDIA zip; the conda-forge build crashes TF) ---
+    $pkg = $cudnn
+    $archive = Join-Path $workDir $pkg.File
+    if (-not (Test-Path $archive)) {
+        Write-Host "Downloading $($pkg.Name) (665 MB) ..."
+        Invoke-WebRequest -Uri $pkg.Url -OutFile $archive
+    }
+    $extractDir = Join-Path $workDir $pkg.Name
+    $dllDir = Join-Path $extractDir 'cuda\bin'
+    $alreadyExtracted = (Test-Path $dllDir) -and ((Get-ChildItem -LiteralPath $dllDir -Filter '*.dll' -File | Measure-Object).Count -gt 0)
+    if (-not $alreadyExtracted) {
+        if (Test-Path $extractDir) { Remove-Item -LiteralPath $extractDir -Recurse -Force }
+        Write-Host "Extracting $($pkg.Name) ..."
+        Expand-Archive -LiteralPath $archive -DestinationPath $extractDir -Force
+    } else {
+        Write-Host "$($pkg.Name) already extracted, skipping."
     }
 
     New-Item -ItemType Directory -Path $binDir -Force | Out-Null
-    foreach ($pkg in $pkgs) {
-        $dllDir = Join-Path $workDir "$($pkg.Name)\Library\bin"
+    foreach ($pkg in @($cudatoolkit, $cudnn)) {
+        $dllDir = if ($pkg.Name -eq 'cudnn') { Join-Path $workDir "$($pkg.Name)\cuda\bin" } else { Join-Path $workDir "$($pkg.Name)\Library\bin" }
         if (Test-Path $dllDir) {
             Get-ChildItem -LiteralPath $dllDir -Filter '*.dll' -File | ForEach-Object {
                 Copy-Item -LiteralPath $_.FullName -Destination $binDir -Force

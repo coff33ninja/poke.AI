@@ -170,9 +170,17 @@ The modernized stack has been verified on a GTX 1070 + GTX 1060 6GB setup.
 These files are too large to be uploaded to GitHub, so you'll have to download
 them yourself and place them inside the cloned repository.
 
-* [Inference Graph](https://mega.nz/#F!AtcH1IbL!u7M8O2FXcsdyLc53pwCORA) -
-  Place `.h5` files under `object_detection/keras-retinanet/inference_graphs/`.
-  The main script expects `map_detector.h5` there.
+* **`map_detector.h5`** (the trained retinanet weights the main script loads
+  from `object_detection/keras-retinanet/inference_graphs/`) is currently
+  **unavailable**: the original mega.nz download
+  (`https://mega.nz/#F!AtcH1IbL!u7M8O2FXcsdyLc53pwCORA`) has been deleted and
+  the file exists nowhere else. A re-upload is being tracked in
+  [poke-AI/poke.AI#13](https://github.com/poke-AI/poke.AI/issues/13). Until it
+  is restored you can verify the detection pipeline end-to-end with the COCO
+  reference weights for the same ResNet50 backbone:
+  `object_detection/keras-retinanet/inference_graphs/resnet50_coco_best_v2.1.0.h5`
+  (download from
+  [keras-retinanet releases](https://github.com/fizyr/keras-retinanet/releases)).
 
 ### Why This Stack (for the curious)
 
