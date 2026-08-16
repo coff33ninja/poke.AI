@@ -2,18 +2,20 @@
 #
 # Usage (from repo root):
 #   powershell -File scripts/train_map_detector.ps1                        # fresh start from COCO
-#   powershell -File scripts/train_map_detector.ps1 -Resume training/snapshots_real/resnet50_csv_02.h5 -InitialEpoch 2 -Epochs 12
+#   powershell -File scripts/train_map_detector.ps1 -Resume training/snapshots_real/resnet50_csv_03.h5 -InitialEpoch 3 -Epochs 12
 #
 # Params:
 #   -Resume         path to a snapshot .h5 to continue from (default: none -> COCO init)
 #   -InitialEpoch   epoch number to resume numbering at (default: 0)
 #   -Epochs         number of epochs to run (default: 12)
+#   -Steps          batches per epoch (default: 313 = one full pass over the 313 unique training images)
 #   -GpuIndex       CUDA_VISIBLE_DEVICES to use (default: 1 = the GTX 1060, NOT the display GPU)
 
 param(
     [string]$Resume = "",
     [int]$InitialEpoch = 0,
     [int]$Epochs = 12,
+    [int]$Steps = 313,
     [int]$GpuIndex = 1
 )
 
@@ -29,7 +31,7 @@ if ($Resume) {
     [void]$args_.Add("--initial-epoch"); [void]$args_.Add("$InitialEpoch")
 }
 [void]$args_.Add("--batch-size");   [void]$args_.Add("1")
-[void]$args_.Add("--steps");        [void]$args_.Add("700")
+[void]$args_.Add("--steps");        [void]$args_.Add("$Steps")
 [void]$args_.Add("--epochs");       [void]$args_.Add("$Epochs")
 [void]$args_.Add("--lr");           [void]$args_.Add("1e-4")
 [void]$args_.Add("--reduce-lr-patience"); [void]$args_.Add("3")
