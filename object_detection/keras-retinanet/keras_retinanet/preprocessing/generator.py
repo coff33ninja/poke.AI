@@ -366,16 +366,24 @@ class Generator(keras.utils.Sequence):
 
     def __len__(self):
         """
-        Number of batches for generator.
+        Number of batches for generator. TF 2.x's KerasSequenceAdapter builds a
+        finite iterator over range(len(self)) and stops training after one pass,
+        so we report a large multiple of the real per-epoch group count and let
+        __getitem__ wrap around each pass (matching upstream keras-retinanet's
+        looping generator behavior). The multiplier must stay small enough that
+        list(range(len(self))) materializes cheaply in the adapter.
         """
 
-        return len(self.groups)
+        return len(self.groups) * 1000
 
     def __getitem__(self, index):
         """
         Keras sequence method for generating batches.
         """
-        group = self.groups[index]
+        group_index = index % len(self.groups)
+        if index != 0 and group_index == 0:
+            self.on_epoch_end()
+        group = self.groups[group_index]
         inputs, targets = self.compute_input_output(group)
 
         return inputs, targets

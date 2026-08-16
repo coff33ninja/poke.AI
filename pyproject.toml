@@ -22,7 +22,7 @@ dependencies = [
 dev = ["ruff"]
 
 [tool.uv.sources]
-keras-retinanet = { path = "object_detection/keras-retinanet" }
+keras-retinanet = { path = "object_detection/keras-retinanet", editable = true }
 
 [tool.uv]
 package = false

@@ -545,6 +545,7 @@ def main(args=None):
         use_multiprocessing=args.multiprocessing,
         max_queue_size=args.max_queue_size,
         validation_data=validation_generator,
+        validation_steps=len(validation_generator.groups) if validation_generator is not None else None,
         initial_epoch=args.initial_epoch
     )
 

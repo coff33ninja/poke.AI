@@ -276,7 +276,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/76/d4/a35cbd07381139dda
 [[package]]
 name = "keras-retinanet"
 version = "1.0.0"
-source = { directory = "object_detection/keras-retinanet" }
+source = { editable = "object_detection/keras-retinanet" }
 dependencies = [
     { name = "keras-resnet" },
     { name = "numpy" },
@@ -463,7 +463,7 @@ dev = [
 requires-dist = [
     { name = "keras", specifier = "==2.10" },
     { name = "keras-resnet", specifier = "==0.2.0" },
-    { name = "keras-retinanet", directory = "object_detection/keras-retinanet" },
+    { name = "keras-retinanet", editable = "object_detection/keras-retinanet" },
     { name = "mss" },
     { name = "numpy", specifier = "==1.23.5" },
     { name = "opencv-python", specifier = "==4.10.0.84" },
