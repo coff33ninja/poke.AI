@@ -1,0 +1,28 @@
+[project]
+name = "poke-ai"
+version = "0.1.0"
+description = "An experimental AI that plays 3rd generation Pokemon games (fork of poke-AI/poke.AI)"
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "numpy==1.23.5",
+    "tensorflow==2.10",
+    "keras==2.10",
+    "keras-resnet==0.2.0",
+    "keras-retinanet",
+    "tensorflow-io-gcs-filesystem==0.27.0",
+    "opencv-python==4.10.0.84",
+    "Pillow",
+    "mss",
+    "pyautogui",
+    "pyzmq",
+]
+
+[dependency-groups]
+dev = ["ruff"]
+
+[tool.uv.sources]
+keras-retinanet = { path = "object_detection/keras-retinanet" }
+
+[tool.uv]
+package = false

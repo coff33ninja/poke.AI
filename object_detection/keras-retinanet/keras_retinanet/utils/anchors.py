@@ -15,10 +15,43 @@ limitations under the License.
 """
 
 import numpy as np
-import keras
-import sys
-if not(sys.platform == 'win32'):
+from tensorflow import keras
+
+try:
     from ..utils.compute_overlap import compute_overlap
+except ImportError:
+    # Pure Python fallback for the cython compute_overlap extension. The
+    # extension is skipped when keras-retinanet is built without a C
+    # compiler (see setup.py). This path is only used for anchor matching
+    # during training/eval, never for inference.
+    def compute_overlap(boxes, query_boxes):
+        """Computes IoU between two sets of boxes [x1, y1, x2, y2].
+
+        Args
+            boxes       : Nx4 array of anchor boxes.
+            query_boxes : Kx4 array of query boxes.
+
+        Returns
+            overlaps : NxK array of IoU values.
+        """
+        num_boxes = len(boxes)
+        num_query = len(query_boxes)
+        overlaps = np.zeros((num_boxes, num_query), dtype=np.float64)
+
+        for k in range(num_query):
+            query_box = query_boxes[k]
+            query_area = (query_box[2] - query_box[0] + 1) * (query_box[3] - query_box[1] + 1)
+
+            for n in range(num_boxes):
+                box = boxes[n]
+                iw = min(box[2], query_box[2]) - max(box[0], query_box[0]) + 1
+                if iw > 0:
+                    ih = min(box[3], query_box[3]) - max(box[1], query_box[1]) + 1
+                    if ih > 0:
+                        union = (box[2] - box[0] + 1) * (box[3] - box[1] + 1) + query_area - iw * ih
+                        overlaps[n, k] = iw * ih / union
+
+        return overlaps
 
 
 class AnchorParameters:
@@ -50,31 +83,6 @@ AnchorParameters.default = AnchorParameters(
     scales  = np.array([2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)], keras.backend.floatx()),
 )
 
-def compute_overlap_windows(a, b):
-    """
-    Parameters
-    ----------
-    a: (N, 4) ndarray of float
-    b: (K, 4) ndarray of float
-    Returns
-    -------
-    overlaps: (N, K) ndarray of overlap between boxes and query_boxes
-    """
-    area = (b[:, 2] - b[:, 0]) * (b[:, 3] - b[:, 1])
-
-    iw = np.minimum(np.expand_dims(a[:, 2], axis=1), b[:, 2]) - np.maximum(np.expand_dims(a[:, 0], 1), b[:, 0])
-    ih = np.minimum(np.expand_dims(a[:, 3], axis=1), b[:, 3]) - np.maximum(np.expand_dims(a[:, 1], 1), b[:, 1])
-
-    iw = np.maximum(iw, 0)
-    ih = np.maximum(ih, 0)
-
-    ua = np.expand_dims((a[:, 2] - a[:, 0]) * (a[:, 3] - a[:, 1]), axis=1) + area - iw * ih
-
-    ua = np.maximum(ua, np.finfo(float).eps)
-
-    intersection = iw * ih
-
-    return intersection / ua
 
 def anchor_targets_bbox(
     anchors,
@@ -89,7 +97,7 @@ def anchor_targets_bbox(
     Args
         anchors: np.array of annotations of shape (N, 4) for (x1, y1, x2, y2).
         image_group: List of BGR images.
-        annotations_group: List of annotations (np.array of shape (N, 5) for (x1, y1, x2, y2, label)).
+        annotations_group: List of annotation dictionaries with each annotation containing 'labels' and 'bboxes' of an image.
         num_classes: Number of classes to predict.
         mask_shape: If the image is padded with zeros, mask_shape can be used to mark the relevant part of the image.
         negative_overlap: IoU overlap for negative anchors (all anchors with overlap < negative_overlap are negative).
@@ -162,11 +170,7 @@ def compute_gt_annotations(
         argmax_overlaps_inds: ordered overlaps indices
     """
 
-    overlaps = None
-    if (sys.platform == 'win32'):
-        overlaps = compute_overlap_windows(anchors.astype(np.float64), annotations.astype(np.float64))
-    else:
-        overlaps = compute_overlap(anchors.astype(np.float64), annotations.astype(np.float64))
+    overlaps = compute_overlap(anchors.astype(np.float64), annotations.astype(np.float64))
     argmax_overlaps_inds = np.argmax(overlaps, axis=1)
     max_overlaps = overlaps[np.arange(overlaps.shape[0]), argmax_overlaps_inds]
 
@@ -194,7 +198,10 @@ def layer_shapes(image_shape, model):
     for layer in model.layers[1:]:
         nodes = layer._inbound_nodes
         for node in nodes:
-            inputs = [shape[lr.name] for lr in node.inbound_layers]
+            if isinstance(node.inbound_layers, keras.layers.Layer):
+                inputs = [shape[node.inbound_layers.name]]
+            else:
+                inputs = [shape[lr.name] for lr in node.inbound_layers]
             if not inputs:
                 continue
             shape[layer.name] = layer.compute_output_shape(inputs[0] if len(inputs) == 1 else inputs)
@@ -339,6 +346,9 @@ def generate_anchors(base_size=16, ratios=None, scales=None):
 def bbox_transform(anchors, gt_boxes, mean=None, std=None):
     """Compute bounding-box regression targets for an image."""
 
+    # The Mean and std are calculated from COCO dataset.
+    # Bounding box normalization was firstly introduced in the Fast R-CNN paper.
+    # See https://github.com/fizyr/keras-retinanet/issues/1273#issuecomment-585828825  for more details
     if mean is None:
         mean = np.array([0, 0, 0, 0])
     if std is None:
@@ -357,6 +367,9 @@ def bbox_transform(anchors, gt_boxes, mean=None, std=None):
     anchor_widths  = anchors[:, 2] - anchors[:, 0]
     anchor_heights = anchors[:, 3] - anchors[:, 1]
 
+    # According to the information provided by a keras-retinanet author, they got marginally better results using
+    # the following way of bounding box parametrization.
+    # See https://github.com/fizyr/keras-retinanet/issues/1273#issuecomment-585828825 for more details
     targets_dx1 = (gt_boxes[:, 0] - anchors[:, 0]) / anchor_widths
     targets_dy1 = (gt_boxes[:, 1] - anchors[:, 1]) / anchor_heights
     targets_dx2 = (gt_boxes[:, 2] - anchors[:, 2]) / anchor_widths

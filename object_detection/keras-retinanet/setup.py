@@ -34,17 +34,27 @@ class BuildExtension(setuptools.Command):
         return self._command.run(*args, **kwargs)
 
 
-extensions = [
-    Extension(
-        'keras_retinanet.utils.compute_overlap',
-        ['keras_retinanet/utils/compute_overlap.pyx']
-    ),
-]
+import os
+
+
+# The cython compute_overlap extension is only needed for anchor matching
+# during training/eval. Building it requires a full MSVC + Windows SDK setup,
+# which breaks on many Windows machines. It is skipped by default; the pure
+# Python fallback in keras_retinanet/utils/anchors.py is used instead. Set
+# RETINANET_BUILD_EXT=1 to opt into building the compiled extension.
+extensions = []
+if os.environ.get("RETINANET_BUILD_EXT"):
+    extensions = [
+        Extension(
+            'keras_retinanet.utils.compute_overlap',
+            ['keras_retinanet/utils/compute_overlap.pyx']
+        ),
+    ]
 
 
 setuptools.setup(
     name             = 'keras-retinanet',
-    version          = '0.5.0',
+    version          = '1.0.0',
     description      = 'Keras implementation of RetinaNet object detection.',
     url              = 'https://github.com/fizyr/keras-retinanet',
     author           = 'Hans Gaiser',
@@ -53,7 +63,7 @@ setuptools.setup(
     maintainer_email = 'h.gaiser@fizyr.com',
     cmdclass         = {'build_ext': BuildExtension},
     packages         = setuptools.find_packages(),
-    install_requires = ['keras', 'keras-resnet', 'six', 'scipy', 'cython', 'Pillow', 'opencv-python', 'progressbar2'],
+    install_requires = ['keras-resnet==0.2.0', 'six', 'numpy', 'Pillow', 'opencv-python', 'progressbar2'],
     entry_points     = {
         'console_scripts': [
             'retinanet-train=keras_retinanet.bin.train:main',
@@ -63,5 +73,5 @@ setuptools.setup(
         ],
     },
     ext_modules    = extensions,
-    setup_requires = ["cython>=0.28", "numpy>=1.14.0"]
+    setup_requires = ["numpy>=1.14.0"]
 )
