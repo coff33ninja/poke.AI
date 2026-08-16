@@ -13,16 +13,17 @@ from PIL import Image
 from auto_controller import controller
 import sys
 
-# Some keras/tensorflow related stuff, even I'm not entirely sure what it does exactly
-def get_session():
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    return tf.Session(config=config)
+# Allow TensorFlow to grow GPU memory on demand. This replaces the old
+# tf.ConfigProto(gpu_options.allow_growth=True) / tf.Session pattern,
+# which no longer exists in TensorFlow 2.x.
+def configure_gpu():
+    for device in tf.config.list_physical_devices("GPU"):
+        tf.config.experimental.set_memory_growth(device, True)
 
 model_path = "../../inference_graphs/400p/resnet101_csv_13.h5" # Model to be used for detection
 labels_to_names = {0: "pokecen", 1: "pokemart", 2: "npc", 3: "house", 4: "gym", 5: "exit"} # Labels to draw
 
-keras.backend.tensorflow_backend.set_session(get_session())
+configure_gpu()
 model = models.load_model(model_path, backbone_name='resnet101')
 
 def nothing(x):

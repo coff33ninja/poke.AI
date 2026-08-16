@@ -32,7 +32,7 @@ class poke_ai:
         self.model_path = model_path
         self.labels_to_names = labels_to_names
 
-        keras.backend.tensorflow_backend.set_session(self.get_session())
+        self.configure_gpu()
         self.detection_model = models.load_model(self.model_path, backbone_name="resnet50")
 
         # Load battle AI model here as well.
@@ -87,11 +87,12 @@ class poke_ai:
     def nothing(self, x):
         pass
 
-    # Some keras/tensorflow related stuff, even I'm not entirely sure what it does exactly
-    def get_session(self):
-        config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True
-        return tf.Session(config=config)
+    # Allow TensorFlow to grow GPU memory on demand. This replaces the old
+    # tf.ConfigProto(gpu_options.allow_growth=True) / tf.Session pattern,
+    # which no longer exists in TensorFlow 2.x.
+    def configure_gpu(self):
+        for device in tf.config.list_physical_devices("GPU"):
+            tf.config.experimental.set_memory_growth(device, True)
 
     # Gets single frame of gameplay as a numpy array on which object inference will be later ran
     def get_screen(self):

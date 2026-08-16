@@ -13,11 +13,10 @@ from mss import mss
 from PIL import Image
 import time
 
-def get_session():
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    return tf.Session(config=config)
-keras.backend.tensorflow_backend.set_session(get_session())
+def configure_gpu():
+    for device in tf.config.list_physical_devices("GPU"):
+        tf.config.experimental.set_memory_growth(device, True)
+configure_gpu()
 
 model_path = "../../object_detection/keras-retinanet/inference_graphs/resnet50_csv_20.h5" # Model to be used for detection
 labels_to_names = {0: "pokecen", 1: "pokemart", 2: "npc", 3: "house", 4: "gym", 5: "exit", 6: "wall", 7:"grass"} # Labels to draw

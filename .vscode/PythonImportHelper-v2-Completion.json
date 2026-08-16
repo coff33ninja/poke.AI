@@ -2116,11 +2116,11 @@
         "documentation": {}
     },
     {
-        "label": "get_session",
+        "label": "configure_gpu",
         "kind": 2,
         "importPath": "ai.prototype_scripts.object_detection_test",
         "description": "ai.prototype_scripts.object_detection_test",
-        "peekOfCode": "def get_session():\n    config = tf.ConfigProto()\n    config.gpu_options.allow_growth = True\n    return tf.Session(config=config)\nkeras.backend.tensorflow_backend.set_session(get_session())\nmodel_path = \"../../object_detection/keras-retinanet/inference_graphs/resnet50_csv_20.h5\" # Model to be used for detection\nlabels_to_names = {0: \"pokecen\", 1: \"pokemart\", 2: \"npc\", 3: \"house\", 4: \"gym\", 5: \"exit\", 6: \"wall\", 7:\"grass\"} # Labels to draw\nmodel = models.load_model(model_path, backbone_name='resnet50')\ngame_window_size = {\"top\": 0, \"left\": 0, \"width\": 720, \"height\": 480}\ngame_window_size[\"left\"], game_window_size[\"top\"], temp1, temp2 = pag.locateOnScreen(\"../find_game_window_windows.png\")",
+        "peekOfCode": "def configure_gpu():\n    for device in tf.config.list_physical_devices(\"GPU\"):\n        tf.config.experimental.set_memory_growth(device, True)\nconfigure_gpu()\nmodel_path = \"../../object_detection/keras-retinanet/inference_graphs/resnet50_csv_20.h5\" # Model to be used for detection\nlabels_to_names = {0: \"pokecen\", 1: \"pokemart\", 2: \"npc\", 3: \"house\", 4: \"gym\", 5: \"exit\", 6: \"wall\", 7:\"grass\"} # Labels to draw\nmodel = models.load_model(model_path, backbone_name='resnet50')\ngame_window_size = {\"top\": 0, \"left\": 0, \"width\": 720, \"height\": 480}\ngame_window_size[\"left\"], game_window_size[\"top\"], temp1, temp2 = pag.locateOnScreen(\"../find_game_window_windows.png\")\ngame_window_size[\"top\"] += 76",
         "detail": "ai.prototype_scripts.object_detection_test",
         "documentation": {}
     },
@@ -2260,11 +2260,11 @@
         "documentation": {}
     },
     {
-        "label": "get_session",
+        "label": "configure_gpu",
         "kind": 2,
         "importPath": "ai.prototype_scripts.state_test",
         "description": "ai.prototype_scripts.state_test",
-        "peekOfCode": "def get_session():\n    config = tf.ConfigProto()\n    config.gpu_options.allow_growth = True\n    return tf.Session(config=config)\nmodel_path = \"../../inference_graphs/400p/resnet101_csv_13.h5\" # Model to be used for detection\nlabels_to_names = {0: \"pokecen\", 1: \"pokemart\", 2: \"npc\", 3: \"house\", 4: \"gym\", 5: \"exit\"} # Labels to draw\nkeras.backend.tensorflow_backend.set_session(get_session())\nmodel = models.load_model(model_path, backbone_name='resnet101')\ndef nothing(x):\n    pass",
+        "peekOfCode": "def configure_gpu():\n    for device in tf.config.list_physical_devices(\"GPU\"):\n        tf.config.experimental.set_memory_growth(device, True)\nmodel_path = \"../../inference_graphs/400p/resnet101_csv_13.h5\" # Model to be used for detection\nlabels_to_names = {0: \"pokecen\", 1: \"pokemart\", 2: \"npc\", 3: \"house\", 4: \"gym\", 5: \"exit\"} # Labels to draw\nconfigure_gpu()\nmodel = models.load_model(model_path, backbone_name='resnet101')\ndef nothing(x):\n    pass\ncv2.namedWindow(\"Output\")",
         "detail": "ai.prototype_scripts.state_test",
         "documentation": {}
     },
@@ -2282,7 +2282,7 @@
         "kind": 5,
         "importPath": "ai.prototype_scripts.state_test",
         "description": "ai.prototype_scripts.state_test",
-        "peekOfCode": "model_path = \"../../inference_graphs/400p/resnet101_csv_13.h5\" # Model to be used for detection\nlabels_to_names = {0: \"pokecen\", 1: \"pokemart\", 2: \"npc\", 3: \"house\", 4: \"gym\", 5: \"exit\"} # Labels to draw\nkeras.backend.tensorflow_backend.set_session(get_session())\nmodel = models.load_model(model_path, backbone_name='resnet101')\ndef nothing(x):\n    pass\ncv2.namedWindow(\"Output\")\ncv2.createTrackbar(\"low_h\", \"Output\", 68, 179, nothing)\ncv2.createTrackbar(\"low_s\", \"Output\", 118, 255, nothing)\ncv2.createTrackbar(\"low_v\", \"Output\", 199, 255, nothing)",
+        "peekOfCode": "model_path = \"../../inference_graphs/400p/resnet101_csv_13.h5\" # Model to be used for detection\nlabels_to_names = {0: \"pokecen\", 1: \"pokemart\", 2: \"npc\", 3: \"house\", 4: \"gym\", 5: \"exit\"} # Labels to draw\nconfigure_gpu()\nmodel = models.load_model(model_path, backbone_name='resnet101')\ndef nothing(x):\n    pass\ncv2.namedWindow(\"Output\")\ncv2.createTrackbar(\"low_h\", \"Output\", 68, 179, nothing)\ncv2.createTrackbar(\"low_s\", \"Output\", 118, 255, nothing)\ncv2.createTrackbar(\"low_v\", \"Output\", 199, 255, nothing)",
         "detail": "ai.prototype_scripts.state_test",
         "documentation": {}
     },
@@ -2291,7 +2291,7 @@
         "kind": 5,
         "importPath": "ai.prototype_scripts.state_test",
         "description": "ai.prototype_scripts.state_test",
-        "peekOfCode": "labels_to_names = {0: \"pokecen\", 1: \"pokemart\", 2: \"npc\", 3: \"house\", 4: \"gym\", 5: \"exit\"} # Labels to draw\nkeras.backend.tensorflow_backend.set_session(get_session())\nmodel = models.load_model(model_path, backbone_name='resnet101')\ndef nothing(x):\n    pass\ncv2.namedWindow(\"Output\")\ncv2.createTrackbar(\"low_h\", \"Output\", 68, 179, nothing)\ncv2.createTrackbar(\"low_s\", \"Output\", 118, 255, nothing)\ncv2.createTrackbar(\"low_v\", \"Output\", 199, 255, nothing)\ncv2.createTrackbar(\"high_h\", \"Output\", 76, 179, nothing)",
+        "peekOfCode": "labels_to_names = {0: \"pokecen\", 1: \"pokemart\", 2: \"npc\", 3: \"house\", 4: \"gym\", 5: \"exit\"} # Labels to draw\nconfigure_gpu()\nmodel = models.load_model(model_path, backbone_name='resnet101')\ndef nothing(x):\n    pass\ncv2.namedWindow(\"Output\")\ncv2.createTrackbar(\"low_h\", \"Output\", 68, 179, nothing)\ncv2.createTrackbar(\"low_s\", \"Output\", 118, 255, nothing)\ncv2.createTrackbar(\"low_v\", \"Output\", 199, 255, nothing)\ncv2.createTrackbar(\"high_h\", \"Output\", 76, 179, nothing)",
         "detail": "ai.prototype_scripts.state_test",
         "documentation": {}
     },
@@ -2570,7 +2570,7 @@
         "kind": 6,
         "importPath": "ai.standalone_backend",
         "description": "ai.standalone_backend",
-        "peekOfCode": "class poke_ai:\n    def __init__(self, model_path, labels_to_names, game_window_size):\n        self.game_window_size = game_window_size\n        self.model_path = model_path\n        self.labels_to_names = labels_to_names\n        keras.backend.tensorflow_backend.set_session(self.get_session())\n        self.detection_model = models.load_model(self.model_path, backbone_name=\"resnet50\")\n        # Load battle AI model here as well.\n        self.battle_model = Sequential()\n        self.battle_model.add(Dense(24, input_dim=2, activation='relu')) # 2 is the number of inputs into our model",
+        "peekOfCode": "class poke_ai:\n    def __init__(self, model_path, labels_to_names, game_window_size):\n        self.game_window_size = game_window_size\n        self.model_path = model_path\n        self.labels_to_names = labels_to_names\n        self.configure_gpu()\n        self.detection_model = models.load_model(self.model_path, backbone_name=\"resnet50\")\n        # Load battle AI model here as well.\n        self.battle_model = Sequential()\n        self.battle_model.add(Dense(24, input_dim=2, activation='relu')) # 2 is the number of inputs into our model",
         "detail": "ai.standalone_backend",
         "documentation": {}
     },
