@@ -132,84 +132,53 @@ For the first prototype/minimum viable product/whatever you like to call it, my 
 
 ## Installation and Setup Guide
 
-Below are the installation instructions for setting up the test environment for this repo on a Windows 10 PC - assuming you have absolutely NONE of the dependencies installed. (I might have missed a few dependencies, but most major things should be here already - [Google](https://lmgtfy.com/?q=how+2+dependencie) exists for a reason!)
+This is a modernized fork: everything runs on Python 3.10 + TensorFlow 2.10 in a
+project-local virtual environment (managed by [uv](https://docs.astral.sh/uv/)).
+Nothing is installed into your system Python, and no system-wide CUDA toolkit
+install is required.
 
-Also, I assume you're using a relatively recent NVIDIA GPU for this. (9-series and above).
+Original hardware this project was developed on: i7-8700K, GTX 1080Ti, 16GB RAM.
+The modernized stack has been verified on a GTX 1070 + GTX 1060 6GB setup.
 
-Our hardware setup for this project is as follows:
-* i7-8700K
-* GTX 1080Ti
-* 16GB RAM
+### Prerequisites
 
-### Installing Python 3.6
-
-* Install Python from the [official website](https://www.python.org/downloads/).
-* During the installation, ensure that you check the box for installing `pip` alongside Python 3.6.
-* Ensure Python 3.6 has been added to your path by opening a new terminal and entering `python --version`. This should report your Python version as 3.6.x.
-* Run the following command in your terminal: `pip install --upgrade pip`
-* Verify `pip` install by typing: `pip --version`
-
-### Install Other Dependencies
-
-* `pip install pillow`
-* `pip install lxml`
-* `pip install jupyter`
-* `pip install matplotlib`
-
-### Install Visual C++ 2015
-
-* [Go to this site](https://visualstudio.microsoft.com/vs/older-downloads/)
-* Select "Redistributables and Build Tools"
-* Download 64-bit version of "Microsoft Visual C++ 2015 Redistributable Update 3"
-
-### Ensure Long Paths are Enabled in Windows
-
-* [Guide](https://superuser.com/questions/1119883/windows-10-enable-ntfs-long-paths-policy-option-missing)
-
-### Update NVIDIA GPU Drivers
-
-* [Driver Update](https://www.nvidia.com/Download/index.aspx?lang=en-us)
-
-### Install CUDA 10.0
-
-* [Download here](https://developer.nvidia.com/cuda-toolkit-archive)
-* Install into the default directory.
-
-### Install cuDNN 7.6.0
-
-* You need a nvidia developer account for this step, but this is free and easy to make
-* [Go to this link](https://developer.nvidia.com/cudnn) and click on "Download cuDNN" Make sure you download cuDNN 7.6.0 for CUDA 10.0 only. The download will be called "cuDNN Library for Windows 10.
-* Extract the downloaded archive.
-* Open your default CUDA installation directory: `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\`
-
-In the cuDNN extracted folder, copy the following files to the following locations:
-* `./cuda/bin/cudnn64_7.dll` to `C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.0/bin/`
-* `./cuda/include/cudnn.h` to `C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.0/include/`
-* `./cuda/lib/x64/cudnn.lib` to `C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.0/lib/x64/`
-
-### Add CUDA, cuDNN, Etc to System Path Environment Variables
-
-Add the following entries:
-* `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin`
-* `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\extras\CUPTI\libx64`
-* `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include`
-
-Now restart your PC
-
-### Install Tensorflow-GPU
-
-* Open a new terminal and run `pip install --user --upgrade tensorflow-gpu==1.13.1`
-* Test installation: `python -c "import tensorflow as tf;print(tf.reduce_sum(tf.random.normal([1000, 1000])))"`
+* Windows 10/11 with a relatively recent NVIDIA GPU (9-series and above)
+* [uv](https://docs.astral.sh/uv/) (installs and manages Python 3.10 for you)
+* Git
+* Updated NVIDIA GPU drivers
 
 ### Setting up this Repository
 
-* `git clone https://github.com/Raghav-B/poke.AI` to your desired directory.
-* `cd cctv_crash_detector/keras-retinanet`
-* `pip install . --user` - This should install all remaining dependencies.
-* `python setup.py build_ext --inplace`
-* If you are missing any libraries later on, they should be fairly easy to install using `pip`.
+* `git clone https://github.com/coff33ninja/poke.AI`
+* `cd poke.AI`
+* `uv sync` - creates `.venv` with Python 3.10 and all dependencies
+  (TensorFlow 2.10 GPU, Keras 2.10, the vendored keras-retinanet, OpenCV, etc.).
+* `powershell -ExecutionPolicy Bypass -File scripts/get_cuda_runtime.ps1`
+  - downloads the CUDA 11.2 + cuDNN 8.1 runtime DLLs into the project-local
+    `cuda_runtime/` folder and installs a `sitecustomize.py` into the venv so
+    TensorFlow can find them at startup. No system-wide CUDA install needed.
+* Verify the GPU is detected:
+  `uv run python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"`
 
-### Getting Infernece Graph and Video Files
+### Running the AI
 
-These files are too large to be uploaded to GitHub, so you'll have to download them yourself and place them inside the cloned repository.
-* [Inference Graph](https://mega.nz/#F!AtcH1IbL!u7M8O2FXcsdyLc53pwCORA) - Place `.h5` files under `object_detection/keras-retinanet/inference_graphs/`
+* `uv run python ai/standalone_backend.py` - the main game-playing loop.
+* `uv run python ai/gui.py` - GUI version (Tkinter).
+
+### Getting Inference Graph and Video Files
+
+These files are too large to be uploaded to GitHub, so you'll have to download
+them yourself and place them inside the cloned repository.
+
+* [Inference Graph](https://mega.nz/#F!AtcH1IbL!u7M8O2FXcsdyLc53pwCORA) -
+  Place `.h5` files under `object_detection/keras-retinanet/inference_graphs/`.
+  The main script expects `map_detector.h5` there.
+
+### Why This Stack (for the curious)
+
+* TensorFlow 1.x (the original dependency) hard-requires Python <= 3.7, which is
+  long EOL. TensorFlow 2.10 is the last version with native Windows GPU support;
+  2.11+ is CPU-only on Windows.
+* keras-retinanet is vendored under `object_detection/keras-retinanet` and
+  patched so it installs without a C compiler (its cython `compute_overlap`
+  extension is optional; a pure-Python fallback is used).

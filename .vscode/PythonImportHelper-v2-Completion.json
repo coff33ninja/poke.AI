@@ -329,15 +329,6 @@
         "documentation": {}
     },
     {
-        "label": "keras",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "keras",
-        "description": "keras",
-        "detail": "keras",
-        "documentation": {}
-    },
-    {
         "label": "models",
         "importPath": "keras_retinanet",
         "description": "keras_retinanet",
