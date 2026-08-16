@@ -7,3 +7,15 @@
 **/.vs
 **/.VS2010
 vba-rerecording/zmq_files/x86-Release/
+
+.venv/
+.ruff_cache/
+__pycache__/
+*.py[cod]
+.fake
+
+# Project-local CUDA/cuDNN runtime DLLs (downloaded by scripts/get_cuda_runtime.ps1)
+cuda_runtime/
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
