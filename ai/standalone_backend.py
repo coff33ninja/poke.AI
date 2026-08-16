@@ -42,12 +42,29 @@ class poke_ai:
         # Initialising battle ai with battle_model
         self.bat_ai = battle_ai(self.battle_model)
 
-        # Finding game window using included .png
-        self.game_window_size["left"], self.game_window_size["top"], temp1, temp2 = pag.locateOnScreen("find_game_window_windows.png", confidence=0.8)
-        # Adding a 76 pixel offset to the y coordinate since the function above returns the x,y
-        # coordinates of the menu bar - we want the coords of the gameplay below this bar
-        # Change this offset to 20 if you are running on ubuntu and are using find_game_window_ubuntu.png
-        self.game_window_size["top"] += 76
+        # Finding the emulator game window by title using the Win32 API (works on any monitor).
+        import ctypes
+        from ctypes import wintypes
+        _user32 = ctypes.windll.user32
+        _hits = []
+        @ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
+        def _find_cb(_hwnd, _lp):
+            _n = _user32.GetWindowTextLengthW(_hwnd)
+            if _n > 0:
+                _buf = ctypes.create_unicode_buffer(_n + 1)
+                _user32.GetWindowTextW(_hwnd, _buf, _n + 1)
+                if _buf.value.startswith("VBA-RR"):
+                    _hits.append(_hwnd)
+            return True
+        _user32.EnumWindows(_find_cb, 0)
+        if not _hits:
+            raise RuntimeError("VBA-RR emulator window not found")
+        _hwnd = _hits[0]
+        _pt = wintypes.POINT(0, 0)
+        _user32.ClientToScreen(_hwnd, ctypes.byref(_pt))
+        # Gameplay sits below the 25px menu bar inside the client area.
+        self.game_window_size["left"] = _pt.x
+        self.game_window_size["top"] = _pt.y + 25
 
         # Initialise screen capturer
         self.sct = mss()
