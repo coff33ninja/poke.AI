@@ -393,6 +393,38 @@
         "documentation": {}
     },
     {
+        "label": "models",
+        "importPath": "keras_retinanet",
+        "description": "keras_retinanet",
+        "isExtraImport": true,
+        "detail": "keras_retinanet",
+        "documentation": {}
+    },
+    {
+        "label": "read_image_bgr",
+        "importPath": "keras_retinanet.utils.image",
+        "description": "keras_retinanet.utils.image",
+        "isExtraImport": true,
+        "detail": "keras_retinanet.utils.image",
+        "documentation": {}
+    },
+    {
+        "label": "preprocess_image",
+        "importPath": "keras_retinanet.utils.image",
+        "description": "keras_retinanet.utils.image",
+        "isExtraImport": true,
+        "detail": "keras_retinanet.utils.image",
+        "documentation": {}
+    },
+    {
+        "label": "resize_image",
+        "importPath": "keras_retinanet.utils.image",
+        "description": "keras_retinanet.utils.image",
+        "isExtraImport": true,
+        "detail": "keras_retinanet.utils.image",
+        "documentation": {}
+    },
+    {
         "label": "read_image_bgr",
         "importPath": "keras_retinanet.utils.image",
         "description": "keras_retinanet.utils.image",
@@ -6937,6 +6969,87 @@
         "description": "training.make_synthetic_dataset",
         "peekOfCode": "DATA_DIR = os.path.join(HERE, \"data\")\ndef make_image(rng, out_path, labels_out):\n    img = np.full((IMG_SIZE, IMG_SIZE, 3), (30, 30, 30), dtype=np.uint8)\n    boxes = []\n    n_boxes = rng.randint(3, 8)\n    attempts = 0\n    while len(boxes) < n_boxes and attempts < 200:\n        attempts += 1\n        w = rng.randint(24, 56)\n        h = rng.randint(24, 56)",
         "detail": "training.make_synthetic_dataset",
+        "documentation": {}
+    },
+    {
+        "label": "iou",
+        "kind": 2,
+        "importPath": "training.verify_synthetic",
+        "description": "training.verify_synthetic",
+        "peekOfCode": "def iou(a, b):\n    ax1, ay1, ax2, ay2 = a[:4]\n    bx1, by1, bx2, by2 = b[:4]\n    ix1, iy1 = max(ax1, bx1), max(ay1, by1)\n    ix2, iy2 = min(ax2, bx2), min(ay2, by2)\n    if ix2 <= ix1 or iy2 <= iy1:\n        return 0.0\n    inter = (ix2 - ix1) * (iy2 - iy1)\n    area_a = (ax2 - ax1) * (ay2 - ay1)\n    area_b = (bx2 - bx1) * (by2 - by1)",
+        "detail": "training.verify_synthetic",
+        "documentation": {}
+    },
+    {
+        "label": "model_path",
+        "kind": 5,
+        "importPath": "training.verify_synthetic",
+        "description": "training.verify_synthetic",
+        "peekOfCode": "model_path = r\"E:\\SCRIPTS\\Games_Related\\poke.AI\\training\\map_detector_synthetic.h5\"\ndata_dir = r\"E:\\SCRIPTS\\Games_Related\\poke.AI\\training\\data\"\n# same load path as ai/standalone_backend.py\nmodel = models.load_model(model_path, backbone_name=\"resnet50\")\nprint(\"Model loaded OK\")\n# class name -> id (same mapping as classes.csv used in training)\nclass_ids = {}\nwith open(os.path.join(data_dir, \"classes.csv\")) as f:\n    for line in f:\n        name, idx = line.strip().split(\",\")",
+        "detail": "training.verify_synthetic",
+        "documentation": {}
+    },
+    {
+        "label": "data_dir",
+        "kind": 5,
+        "importPath": "training.verify_synthetic",
+        "description": "training.verify_synthetic",
+        "peekOfCode": "data_dir = r\"E:\\SCRIPTS\\Games_Related\\poke.AI\\training\\data\"\n# same load path as ai/standalone_backend.py\nmodel = models.load_model(model_path, backbone_name=\"resnet50\")\nprint(\"Model loaded OK\")\n# class name -> id (same mapping as classes.csv used in training)\nclass_ids = {}\nwith open(os.path.join(data_dir, \"classes.csv\")) as f:\n    for line in f:\n        name, idx = line.strip().split(\",\")\n        class_ids[name] = int(idx)",
+        "detail": "training.verify_synthetic",
+        "documentation": {}
+    },
+    {
+        "label": "model",
+        "kind": 5,
+        "importPath": "training.verify_synthetic",
+        "description": "training.verify_synthetic",
+        "peekOfCode": "model = models.load_model(model_path, backbone_name=\"resnet50\")\nprint(\"Model loaded OK\")\n# class name -> id (same mapping as classes.csv used in training)\nclass_ids = {}\nwith open(os.path.join(data_dir, \"classes.csv\")) as f:\n    for line in f:\n        name, idx = line.strip().split(\",\")\n        class_ids[name] = int(idx)\nid_names = {v: k for k, v in class_ids.items()}\n# ground truth from val labels",
+        "detail": "training.verify_synthetic",
+        "documentation": {}
+    },
+    {
+        "label": "class_ids",
+        "kind": 5,
+        "importPath": "training.verify_synthetic",
+        "description": "training.verify_synthetic",
+        "peekOfCode": "class_ids = {}\nwith open(os.path.join(data_dir, \"classes.csv\")) as f:\n    for line in f:\n        name, idx = line.strip().split(\",\")\n        class_ids[name] = int(idx)\nid_names = {v: k for k, v in class_ids.items()}\n# ground truth from val labels\ngt = {}\nwith open(os.path.join(data_dir, \"val_labels.csv\")) as f:\n    for line in f:",
+        "detail": "training.verify_synthetic",
+        "documentation": {}
+    },
+    {
+        "label": "id_names",
+        "kind": 5,
+        "importPath": "training.verify_synthetic",
+        "description": "training.verify_synthetic",
+        "peekOfCode": "id_names = {v: k for k, v in class_ids.items()}\n# ground truth from val labels\ngt = {}\nwith open(os.path.join(data_dir, \"val_labels.csv\")) as f:\n    for line in f:\n        parts = line.strip().split(\",\")\n        name = os.path.join(data_dir, *parts[0].split(\"/\"))\n        gt.setdefault(name, []).append((int(parts[1]), int(parts[2]), int(parts[3]), int(parts[4]), class_ids[parts[5]]))\ndef iou(a, b):\n    ax1, ay1, ax2, ay2 = a[:4]",
+        "detail": "training.verify_synthetic",
+        "documentation": {}
+    },
+    {
+        "label": "gt",
+        "kind": 5,
+        "importPath": "training.verify_synthetic",
+        "description": "training.verify_synthetic",
+        "peekOfCode": "gt = {}\nwith open(os.path.join(data_dir, \"val_labels.csv\")) as f:\n    for line in f:\n        parts = line.strip().split(\",\")\n        name = os.path.join(data_dir, *parts[0].split(\"/\"))\n        gt.setdefault(name, []).append((int(parts[1]), int(parts[2]), int(parts[3]), int(parts[4]), class_ids[parts[5]]))\ndef iou(a, b):\n    ax1, ay1, ax2, ay2 = a[:4]\n    bx1, by1, bx2, by2 = b[:4]\n    ix1, iy1 = max(ax1, bx1), max(ay1, by1)",
+        "detail": "training.verify_synthetic",
+        "documentation": {}
+    },
+    {
+        "label": "total_tp",
+        "kind": 5,
+        "importPath": "training.verify_synthetic",
+        "description": "training.verify_synthetic",
+        "peekOfCode": "total_tp = 0\ntotal_gt = 0\nfor path, labels in gt.items():\n    frame = np.array(read_image_bgr(path), copy=True)\n    image = preprocess_image(frame)\n    image, scale = resize_image(image, min_side=320)\n    boxes, scores, labels_out = model.predict_on_batch(np.expand_dims(image, axis=0))\n    boxes /= scale\n    dets = [(b.astype(int).tolist(), float(s), int(l)) for b, s, l in zip(boxes[0], scores[0], labels_out[0]) if s >= 0.5]\n    matched = set()",
+        "detail": "training.verify_synthetic",
+        "documentation": {}
+    },
+    {
+        "label": "total_gt",
+        "kind": 5,
+        "importPath": "training.verify_synthetic",
+        "description": "training.verify_synthetic",
+        "peekOfCode": "total_gt = 0\nfor path, labels in gt.items():\n    frame = np.array(read_image_bgr(path), copy=True)\n    image = preprocess_image(frame)\n    image, scale = resize_image(image, min_side=320)\n    boxes, scores, labels_out = model.predict_on_batch(np.expand_dims(image, axis=0))\n    boxes /= scale\n    dets = [(b.astype(int).tolist(), float(s), int(l)) for b, s, l in zip(boxes[0], scores[0], labels_out[0]) if s >= 0.5]\n    matched = set()\n    tp = 0",
+        "detail": "training.verify_synthetic",
         "documentation": {}
     },
     {

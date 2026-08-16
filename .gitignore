@@ -20,4 +20,16 @@ cuda_runtime/
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md
 
-training/data/
+training/data/synthetic/
+training/data/real/train_labels.csv
+training/data/real/val_labels.csv
+training/snapshots*/
+training/*.log
+training/*.pid
+training/*.h5
+training/data/train/
+training/data/val/
+training/data/classes.csv
+training/data/train_labels.csv
+training/data/val_labels.csv
+training/data/real/classes.csv

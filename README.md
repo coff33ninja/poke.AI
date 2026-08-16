@@ -182,6 +182,14 @@ them yourself and place them inside the cloned repository.
   (download from
   [keras-retinanet releases](https://github.com/fizyr/keras-retinanet/releases)).
 
+  **Better: train your own.** The repo still contains the real training data the
+  author used (`object_detection/training_data_new/` + 8-class annotations).
+  `training/README.md` has the full recipe; a fine-tune from the COCO weights
+  runs in ~3 hours on a 6GB GPU and produces a drop-in `map_detector.h5`.
+  The label-ID order used there matches the app's hard-coded mapping
+  (`pokecen=0 ... grass=7` in `ai/standalone_backend.py:326`), so no code
+  changes are needed.
+
 ### Why This Stack (for the curious)
 
 * TensorFlow 1.x (the original dependency) hard-requires Python <= 3.7, which is
